@@ -18,6 +18,16 @@ module Recommendify::CCMatrix
     end
   end
 
+  def del_set(set_id, item_ids)
+    item_ids.each do |item_id|
+      item_count_decr(item_id)
+    end
+    all_pairs(item_ids).map do |pair|
+      i1, i2 = pair.split(":")
+      ccmatrix.decr(i1, i2)
+    end
+  end
+
   def add_single(set_id, item_id, other_item_ids)
     item_count_incr(item_id)
     other_item_ids.each do |other_item|
@@ -42,6 +52,10 @@ private
 
   def item_count_incr(key)
     Recommendify.redis.hincrby(redis_key(:items), key, 1)
+  end
+
+  def item_count_decr(key)
+    Recommendify.redis.hincrby(redis_key(:items), key, -1)
   end
 
   def item_count(key)
